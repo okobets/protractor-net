@@ -1,18 +1,18 @@
 ﻿namespace Protractor
 {
     /// <summary>
-    /// Wrapper around the NgBy.SelectedOption() static method to provide typed By selector for FindsByAttribute usage.
+    ///     Wrapper around the NgBy.SelectedOption() static method to provide typed By selector for FindsByAttribute usage.
     /// </summary>
     public class NgBySelectedOption : JavaScriptBy
     {
         /// <summary>
-        /// Creates a new instance of <see cref="NgBySelectedOption"/>.
+        ///     Creates a new instance of <see cref="NgBySelectedOption" />.
         /// </summary>
         /// <param name="model">The model name.</param>
         public NgBySelectedOption(string model)
             : base(ClientSideScripts.FindSelectedOptions, model)
         {
-            base.Description = "NgBy.SelectedOption: " + model;
+            Description = "NgBy.SelectedOption: " + model;
         }
     }
 }

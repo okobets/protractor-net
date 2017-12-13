@@ -1,9 +1,7 @@
-﻿using System;
-
-namespace Protractor
+﻿namespace Protractor
 {
     /// <summary>
-    /// Module automatically installed by Protractor when a page is loaded with Angular 1.
+    ///     Module automatically installed by Protractor when a page is loaded with Angular 1.
     /// </summary>
     internal class Ng1BaseModule : NgModule
     {

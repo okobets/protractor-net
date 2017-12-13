@@ -26,45 +26,45 @@ namespace Protractor
          */
         private const string GetNg1HooksHelper = @"
 function getNg1Hooks(selector, injectorPlease) {
-    function tryEl(el) {
-        try {
-            if (!injectorPlease && angular.getTestability) {
-                var $$testability = angular.getTestability(el);
-                if ($$testability) {
-                    return {$$testability: $$testability};
-                }
-            } else {
-                var $injector = angular.element(el).injector();
-                if ($injector) {
-                    return {$injector: $injector};
-                }
-            }
-        } catch(err) {} 
-    }
-    function trySelector(selector) {
-        var els = document.querySelectorAll(selector);
-        for (var i = 0; i < els.length; i++) {
-            var elHooks = tryEl(els[i]);
-            if (elHooks) {
-                return elHooks;
-            }
+  function tryEl(el) {
+    try {
+      if (!injectorPlease && angular.getTestability) {
+        var $$testability = angular.getTestability(el);
+        if ($$testability) {
+          return {$$testability: $$testability};
         }
+      } else {
+        var $injector = angular.element(el).injector();
+        if ($injector) {
+          return {$injector: $injector};
+        }
+      }
+    } catch(err) {}
+  }
+  function trySelector(selector) {
+    var els = document.querySelectorAll(selector);
+    for (var i = 0; i < els.length; i++) {
+      var elHooks = tryEl(els[i]);
+      if (elHooks) {
+        return elHooks;
+      }
     }
+  }
 
-    if (selector) {
-        return trySelector(selector);
-    } else if (window.__TESTABILITY__NG1_APP_ROOT_INJECTOR__) {
-        var $injector = window.__TESTABILITY__NG1_APP_ROOT_INJECTOR__;
-        var $$testability = null;
-        try {
-            $$testability = $injector.get('$$testability');
-        } catch (e) {}
-        return {$injector: $injector, $$testability: $$testability};
-    } else {
-        return tryEl(document.body) ||
-            trySelector('[ng-app]') || trySelector('[ng\\:app]') ||
-            trySelector('[ng-controller]') || trySelector('[ng\\:controller]');
-    }
+  if (selector) {
+    return trySelector(selector);
+  } else if (window.__TESTABILITY__NG1_APP_ROOT_INJECTOR__) {
+    var $injector = window.__TESTABILITY__NG1_APP_ROOT_INJECTOR__;
+    var $$testability = null;
+    try {
+      $$testability = $injector.get('$$testability');
+    } catch (e) {}
+    return {$injector: $injector, $$testability: $$testability};
+  } else {
+    return tryEl(document.body) ||
+        trySelector('[ng-app]') || trySelector('[ng\\:app]') ||
+        trySelector('[ng-controller]') || trySelector('[ng\\:controller]');
+  }
 };
 ";
 
@@ -76,92 +76,158 @@ function getNg1Hooks(selector, injectorPlease) {
          * arguments[1] {function} callback
          */
         public const string WaitForAngular = GetNg1HooksHelper + @"
-var rootSelector = arguments[0];
-var callback = arguments[1];
-if (window.angular && !(window.angular.version && window.angular.version.major > 1)) {
-    /* ng1 */
-    var hooks = getNg1Hooks(rootSelector);
-    if (hooks.$$testability) {
-        hooks.$$testability.whenStable(callback);
-    } else if (hooks.$injector) {
-        hooks.$injector.get('$browser').
-        notifyWhenNoOutstandingRequests(callback);
-    } else if (!!rootSelector) {
-        throw new Error('Could not automatically find injector on page: ""' +
-            window.location.toString() + '"". Consider setting rootElement');
-    } else {
-    throw new Error('root element (' + rootSelector + ') has no injector.' +
-        ' this may mean it is not inside ng-app.');
-    }
-} else if (rootSelector && window.getAngularTestability) {
-    var el = document.querySelector(rootSelector);
-    window.getAngularTestability(el).whenStable(callback);
-} else if (window.getAllAngularTestabilities) {
-    var testabilities = window.getAllAngularTestabilities();
-    var count = testabilities.length;
-    var decrement = function() {
-        count--;
-        if (count === 0) {
-            callback();
+  var rootSelector = arguments[0];
+  var callback = arguments[1];
+
+  try {
+    // Wait for both angular1 testability and angular2 testability.
+
+    var testCallback = callback;
+
+    // Wait for angular1 testability first and run waitForAngular2 as a callback
+    var waitForAngular1 = function(callback) {
+
+      if (window.angular) {
+        var hooks = getNg1Hooks(rootSelector);
+        if (!hooks){
+          callback();  // not an angular1 app
         }
+        else{
+          if (hooks.$$testability) {
+            hooks.$$testability.whenStable(callback);
+          } else if (hooks.$injector) {
+            hooks.$injector.get('$browser')
+                .notifyWhenNoOutstandingRequests(callback);
+          } else if (!!rootSelector) {
+            throw new Error(
+                'Could not automatically find injector on page: ' +
+                window.location.toString() + '.  Consider using config.rootEl');
+          } else {
+            throw new Error(
+                'root element (' + rootSelector + ') has no injector.' +
+                ' this may mean it is not inside ng-app.');
+          }
+        }
+      }
+      else {callback();}  // not an angular1 app
     };
-    testabilities.forEach(function(testability) {
-        testability.whenStable(decrement);
-    });
-} else if (!window.angular) {
-    throw new Error('window.angular is undefined.  This could be either ' +
-        'because this is a non-angular page or because your test involves ' +
-        'client-side navigation, which can interfere with Protractor\'s ' +
-        'bootstrapping.  See http://git.io/v4gXM for details');
-} else if (window.angular.version >= 2) {
-    throw new Error('You appear to be using angular, but window.' +
-        'getAngularTestability was never set.  This may be due to bad ' +
-        'obfuscation.');
-} else {
-    throw new Error('Cannot get testability API for unknown angular ' +
-        'version ""' + window.angular.version + '""');
-}";
+
+    // Wait for Angular2 testability and then run test callback
+    var waitForAngular2 = function() {
+      if (window.getAngularTestability) {
+        if (rootSelector) {
+          var testability = null;
+          var el = document.querySelector(rootSelector);
+          try{
+            testability = window.getAngularTestability(el);
+          }
+          catch(e){}
+          if (testability) {
+            return testability.whenStable(function() { testCallback(); });
+          }
+        }
+
+        // Didn't specify root element or testability could not be found
+        // by rootSelector. This may happen in a hybrid app, which could have
+        // more than one root.
+        var testabilities = window.getAllAngularTestabilities();
+        var count = testabilities.length;
+
+        // No angular2 testability, this happens when
+        // going to a hybrid page and going back to a pure angular1 page
+        if (count === 0) {
+          return testCallback();
+        }
+
+        var decrement = function() {
+          count--;
+          if (count === 0) {
+            testCallback();
+          }
+        };
+        testabilities.forEach(function(testability) {
+          testability.whenStable(decrement);
+        });
+
+      }
+      else {testCallback();}  // not an angular2 app
+    };
+
+    if (!(window.angular) && !(window.getAngularTestability)) {
+      // no testability hook
+      throw new Error(
+          'both angularJS testability and angular testability are undefined.' +
+          '  This could be either ' +
+          'because this is a non-angular page or because your test involves ' +
+          'client-side navigation, which can interfere with Protractor\'s ' +
+          'bootstrapping.  See http://git.io/v4gXM for details');
+    } else {waitForAngular1(waitForAngular2);}  // Wait for angular1 and angular2
+                                                // Testability hooks sequentially
+
+  } catch (err) {
+    callback(err.message);
+  }
+";
 
         /**
          * Tests whether the angular global variable is present on a page. 
          * Retries in case the page is just loading slowly.
+         * @param {number} attempts Number of times to retry.
+         * @param {boolean} ng12Hybrid Flag set if app is a hybrid of angular 1 and 2
+         * @param {function({version: ?number, message: ?string})} asyncCallback callback
          */
         public const string TestForAngular = @"
-var asyncCallback = arguments[0];
-var callback = function(args) {
+  var attempts = 5;
+  var ng12Hybrid = false;
+  var asyncCallback = arguments[0];
+
+  var callback = function(args) {
     setTimeout(function() {
-        asyncCallback(args);
+      asyncCallback(args);
     }, 0);
-};
-var definitelyNg1 = false;
-var definitelyNg2OrNewer = false;
-var check = function() {
-    /* Figure out which version of angular we're waiting on */
-    if (!definitelyNg1 && !definitelyNg2OrNewer) {
+  };
+  var definitelyNg1 = !!ng12Hybrid;
+  var definitelyNg2OrNewer = false;
+  var check = function(n) {
+    try {
+      /* Figure out which version of angular we're waiting on */
+      if (!definitelyNg1 && !definitelyNg2OrNewer) {
         if (window.angular && !(window.angular.version && window.angular.version.major > 1)) {
-            definitelyNg1 = true;
+          definitelyNg1 = true;
         } else if (window.getAllAngularTestabilities) {
-            definitelyNg2OrNewer = true;
+          definitelyNg2OrNewer = true;
         }
-    }
-    /* See if our version of angular is ready */
-    if (definitelyNg1) {
+      }
+      /* See if our version of angular is ready */
+      if (definitelyNg1) {
         if (window.angular && window.angular.resumeBootstrap) {
-            return callback(1);
+          return callback({ver: 1});
         }
-    } else if (definitelyNg2OrNewer) {
+      } else if (definitelyNg2OrNewer) {
         if (true /* ng2 has no resumeBootstrap() */) {
-            return callback(2);
+          return callback({ver: 2});
         }
+      }
+      /* Try again (or fail) */
+      if (n < 1) {
+        if (definitelyNg1 && window.angular) {
+          callback({message: 'angular never provided resumeBootstrap'});
+        } else if (ng12Hybrid && !window.angular) {
+          callback({message: 'angular 1 never loaded' +
+              window.getAllAngularTestabilities ? ' (are you sure this app ' +
+              'uses ngUpgrade?  Try un-setting ng12Hybrid)' : ''});
+        } else {
+          callback({message: 'retries looking for angular exceeded'});
+        }
+      } else {
+        window.setTimeout(function() {check(n - 1);}, 1000);
+      }
+    } catch (e) {
+      callback({message: e});
     }
-    /* Try again (or fail) */
-    if (definitelyNg1 && window.angular) {
-        throw new Error('angular never provided resumeBootstrap');
-    } else {
-        window.setTimeout(function() {check()}, 1000);
-    }
-};
-check();";
+  };
+  check(attempts);
+";
 
         /**
          * Continue to bootstrap Angular. 
