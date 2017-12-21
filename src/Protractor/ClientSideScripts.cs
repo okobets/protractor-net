@@ -248,7 +248,7 @@ var hooks = getNg1Hooks(arguments[0]);
 if (angular.getTestability) {
     return hooks.$$testability.getLocation();
 }
-return hooks.$injector.get('$location').getLocation();";
+return hooks.$injector.get('$location').absUrl();";
 
         /**
          * Browse to another page using in-page navigation.
@@ -299,32 +299,35 @@ return angular.element(element).scope().$eval(expression);";
         public const string FindBindings = GetNg1HooksHelper + @"
 var binding = arguments[0];
 var exactMatch = arguments[1];
+var rootSelector = arguments[2];
 var using = arguments[3] || document;
-if (angular.getTestability) {
-    return getNg1Hooks(arguments[2]).$$testability.
+
+  if (angular.getTestability) {
+    return getNg1Hooks(rootSelector).$$testability.
         findBindings(using, binding, exactMatch);
-}
-var bindings = using.getElementsByClassName('ng-binding');
-var matches = [];
-for (var i = 0; i < bindings.length; ++i) {
+  }
+  var bindings = using.getElementsByClassName('ng-binding');
+  var matches = [];
+  for (var i = 0; i < bindings.length; ++i) {
     var dataBinding = angular.element(bindings[i]).data('$binding');
     if (dataBinding) {
-        var bindingName = dataBinding.exp || dataBinding[0].exp || dataBinding;
-        if (exactMatch) {
-            var matcher = new RegExp('({|\\s|^|\\|)' +
-                /* See http://stackoverflow.com/q/3561711 */
-                binding.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&') +
-                '(}|\\s|$|\\|)');
-            if (matcher.test(bindingName)) {
-                matches.push(bindings[i]);
-            }
-        } else {
-            if (bindingName.indexOf(binding) != -1) {
-                matches.push(bindings[i]);
-            }
+      var bindingName = dataBinding.exp || dataBinding[0].exp || dataBinding;
+      if (exactMatch) {
+        var matcher = new RegExp('({|\\s|^|\\|)' +
+            /* See http://stackoverflow.com/q/3561711 */
+            binding.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&') +
+            '(}|\\s|$|\\|)');
+        if (matcher.test(bindingName)) {
+          matches.push(bindings[i]);
         }
+      } else {
+        if (bindingName.indexOf(binding) != -1) {
+          matches.push(bindings[i]);
+        }
+      }
+
     }
-}
+  }
 return matches;";
 
         /**
@@ -339,18 +342,19 @@ return matches;";
         public const string FindModel = GetNg1HooksHelper + @"
 var model = arguments[0];
 var using = arguments[2] || document;
-if (angular.getTestability) {
-    return getNg1Hooks(arguments[1]).$$testability.
+
+  if (angular.getTestability) {
+    return getNg1Hooks(rootSelector).$$testability.
         findModels(using, model, true);
-}
-var prefixes = ['ng-', 'ng_', 'data-ng-', 'x-ng-', 'ng\\:'];
-for (var p = 0; p < prefixes.length; ++p) {
+  }
+  var prefixes = ['ng-', 'ng_', 'data-ng-', 'x-ng-', 'ng\\:'];
+  for (var p = 0; p < prefixes.length; ++p) {
     var selector = '[' + prefixes[p] + 'model=""' + model + '""]';
-    var inputs = using.querySelectorAll(selector);
-    if (inputs.length) {
-        return inputs;
-    }
-}";
+        var elements = using.querySelectorAll(selector);
+            if (elements.length) {
+            return elements;
+        }
+    }";
 
         /**
          * Find selected option elements by model name.
@@ -384,47 +388,48 @@ for (var p = 0; p < prefixes.length; ++p) {
          * @return {Array.WebElement} All rows of the repeater.
          */
         public const string FindAllRepeaterRows = @"
-var repeaterMatch = function(ngRepeat, repeater, exact) {
-    if (exact) {
-        return ngRepeat.split(' track by ')[0].split(' as ')[0].split('|')[0].
-            split('=')[0].trim() == repeater;
-    } else {
-        return ngRepeat.indexOf(repeater) != -1;
-    }
-};
+function repeaterMatch(ngRepeat, repeater, exact) {
+  if (exact) {
+    return ngRepeat.split(' track by ')[0].split(' as ')[0].split('|')[0].
+        split('=')[0].trim() == repeater;
+  } else {
+    return ngRepeat.indexOf(repeater) != -1;
+  }
+}
 
 var repeater = arguments[0];
 var exactMatch = arguments[1];
 var using = arguments[3] || document;
-var rows = [];
-var prefixes = ['ng-', 'ng_', 'data-ng-', 'x-ng-', 'ng\\:'];
-for (var p = 0; p < prefixes.length; ++p) {
+
+  var rows = [];
+  var prefixes = ['ng-', 'ng_', 'data-ng-', 'x-ng-', 'ng\\:'];
+  for (var p = 0; p < prefixes.length; ++p) {
     var attr = prefixes[p] + 'repeat';
     var repeatElems = using.querySelectorAll('[' + attr + ']');
     attr = attr.replace(/\\/g, '');
     for (var i = 0; i < repeatElems.length; ++i) {
-        if (repeaterMatch(repeatElems[i].getAttribute(attr), repeater, exactMatch)) {
-            rows.push(repeatElems[i]);
-        }
+      if (repeaterMatch(repeatElems[i].getAttribute(attr), repeater, exact)) {
+        rows.push(repeatElems[i]);
+      }
     }
-}
-for (var p = 0; p < prefixes.length; ++p) {
+  }
+  for (var p = 0; p < prefixes.length; ++p) {
     var attr = prefixes[p] + 'repeat-start';
     var repeatElems = using.querySelectorAll('[' + attr + ']');
     attr = attr.replace(/\\/g, '');
     for (var i = 0; i < repeatElems.length; ++i) {
-        if (repeaterMatch(repeatElems[i].getAttribute(attr), repeater, exactMatch)) {
-            var elem = repeatElems[i];
-            while (elem.nodeType != 8 || 
-                    !repeaterMatch(elem.nodeValue, repeater)) {
-                if (elem.nodeType == 1) {
-                    rows.push(elem);
-                }
-                elem = elem.nextSibling;
-            }
+      if (repeaterMatch(repeatElems[i].getAttribute(attr), repeater, exact)) {
+        var elem = repeatElems[i];
+        while (elem.nodeType != 8 ||
+            !repeaterMatch(elem.nodeValue, repeater)) {
+          if (elem.nodeType == 1) {
+            rows.push(elem);
+          }
+          elem = elem.nextSibling;
         }
+      }
     }
-}
+  }
 return rows;";
 
         #endregion
