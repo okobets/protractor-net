@@ -245,6 +245,7 @@ window.__TESTABILITY__NG1_APP_ROOT_INJECTOR__ =
          */
         public const string GetLocation = GetNg1HooksHelper + @"
 var hooks = getNg1Hooks(arguments[0]);
+
 if (angular.getTestability) {
     return hooks.$$testability.getLocation();
 }
@@ -259,6 +260,7 @@ return hooks.$injector.get('$location').absUrl();";
         public const string SetLocation = GetNg1HooksHelper + @"
 var hooks = getNg1Hooks(arguments[0]);
 var url = arguments[1];
+
 if (angular.getTestability) {
     return hooks.$$testability.setLocation(url);
 }
@@ -341,6 +343,7 @@ return matches;";
          */
         public const string FindModel = GetNg1HooksHelper + @"
 var model = arguments[0];
+var rootSelector = arguments[1];
 var using = arguments[2] || document;
 
   if (angular.getTestability) {
@@ -367,7 +370,9 @@ var using = arguments[2] || document;
          */
         public const string FindSelectedOptions = @"
 var model = arguments[0];
+var rootSelector = arguments[1];
 var using = arguments[2] || document;
+
 var prefixes = ['ng-', 'ng_', 'data-ng-', 'x-ng-', 'ng\\:'];
 for (var p = 0; p < prefixes.length; ++p) {
     var selector = 'select[' + prefixes[p] + 'model=""' + model + '""] option:checked';
@@ -399,6 +404,7 @@ function repeaterMatch(ngRepeat, repeater, exact) {
 
 var repeater = arguments[0];
 var exactMatch = arguments[1];
+var rootSelector = arguments[2];
 var using = arguments[3] || document;
 
   var rows = [];
