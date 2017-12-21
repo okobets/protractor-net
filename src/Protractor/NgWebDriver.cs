@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Internal;
+using OpenQA.Selenium.Remote;
+using OpenQA.Selenium.Safari;
 
 namespace Protractor
 {
@@ -13,6 +16,7 @@ namespace Protractor
     public class NgWebDriver : IWebDriver, IWrapsDriver, IJavaScriptExecutor
     {
         private const string AngularDeferBootstrap = "NG_DEFER_BOOTSTRAP!";
+        private const int stepDelay = 3000;
 
         private readonly IJavaScriptExecutor jsExecutor;
         private readonly IList<NgModule> mockModules;
@@ -281,7 +285,12 @@ namespace Protractor
         {
             if (by is JavaScriptBy scriptBy)
                 scriptBy.AdditionalScriptArguments = new object[] {RootElement};
+            
             WaitForAngular();
+
+            if (WrappedDriver is RemoteWebDriver driver && driver.Capabilities.BrowserName.ToLowerInvariant().Contains("safari")) 
+                Thread.Sleep(stepDelay);
+
             return new NgWebElement(this, WrappedDriver.FindElement(by));
         }
 
@@ -298,7 +307,12 @@ namespace Protractor
         {
             if (by is JavaScriptBy scriptBy)
                 scriptBy.AdditionalScriptArguments = new object[] {RootElement};
+
             WaitForAngular();
+            
+            if (WrappedDriver is RemoteWebDriver driver && driver.Capabilities.BrowserName.ToLowerInvariant().Contains("safari")) 
+                Thread.Sleep(stepDelay);
+
             return new ReadOnlyCollection<NgWebElement>(WrappedDriver.FindElements(by)
                 .Select(e => new NgWebElement(this, e)).ToList());
         }
@@ -312,7 +326,12 @@ namespace Protractor
         {
             if (by is JavaScriptBy scriptBy)
                 scriptBy.AdditionalScriptArguments = new object[] {RootElement};
+
             WaitForAngular();
+            
+            if (WrappedDriver is RemoteWebDriver driver && driver.Capabilities.BrowserName.ToLowerInvariant().Contains("safari")) 
+                Thread.Sleep(stepDelay);
+
             return new ReadOnlyCollection<IWebElement>(WrappedDriver.FindElements(by)
                 .Select(e => (IWebElement) new NgWebElement(this, e)).ToList());
         }

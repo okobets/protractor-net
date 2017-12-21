@@ -408,7 +408,7 @@ var using = arguments[3] || document;
     var repeatElems = using.querySelectorAll('[' + attr + ']');
     attr = attr.replace(/\\/g, '');
     for (var i = 0; i < repeatElems.length; ++i) {
-      if (repeaterMatch(repeatElems[i].getAttribute(attr), repeater, exact)) {
+      if (repeaterMatch(repeatElems[i].getAttribute(attr), repeater, exactMatch)) {
         rows.push(repeatElems[i]);
       }
     }
@@ -418,7 +418,7 @@ var using = arguments[3] || document;
     var repeatElems = using.querySelectorAll('[' + attr + ']');
     attr = attr.replace(/\\/g, '');
     for (var i = 0; i < repeatElems.length; ++i) {
-      if (repeaterMatch(repeatElems[i].getAttribute(attr), repeater, exact)) {
+      if (repeaterMatch(repeatElems[i].getAttribute(attr), repeater, exactMatch)) {
         var elem = repeatElems[i];
         while (elem.nodeType != 8 ||
             !repeaterMatch(elem.nodeValue, repeater)) {
