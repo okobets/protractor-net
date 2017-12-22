@@ -15,8 +15,7 @@ namespace Protractor
     public class NgWebDriver : IWebDriver, IWrapsDriver, IJavaScriptExecutor
     {
         private const string AngularDeferBootstrap = "NG_DEFER_BOOTSTRAP!";
-        private const int StepDelay = 500;
-        private const int WaitDelay = 3000;
+        private const int WaitDelay = 500;
 
         private readonly IJavaScriptExecutor jsExecutor;
         private readonly IList<NgModule> mockModules;
@@ -54,6 +53,9 @@ namespace Protractor
             jsExecutor = (IJavaScriptExecutor) driver;
             RootElement = rootElement;
             this.mockModules = new List<NgModule>(mockModules);
+
+            if (WrappedDriver is RemoteWebDriver d && d.Capabilities.BrowserName.ToLowerInvariant().Contains("safari")) 
+                Thread.Sleep(5000);
         }
 
         /// <summary>
@@ -294,9 +296,6 @@ namespace Protractor
             
             WaitForAngular();
 
-            if (WrappedDriver is RemoteWebDriver driver && driver.Capabilities.BrowserName.ToLowerInvariant().Contains("safari")) 
-                Thread.Sleep(StepDelay);
-
             return new NgWebElement(this, WrappedDriver.FindElement(by));
         }
 
@@ -316,9 +315,6 @@ namespace Protractor
 
             WaitForAngular();
             
-            if (WrappedDriver is RemoteWebDriver driver && driver.Capabilities.BrowserName.ToLowerInvariant().Contains("safari")) 
-                Thread.Sleep(StepDelay);
-
             return new ReadOnlyCollection<NgWebElement>(WrappedDriver.FindElements(by)
                 .Select(e => new NgWebElement(this, e)).ToList());
         }
@@ -335,9 +331,6 @@ namespace Protractor
 
             WaitForAngular();
             
-            if (WrappedDriver is RemoteWebDriver driver && driver.Capabilities.BrowserName.ToLowerInvariant().Contains("safari")) 
-                Thread.Sleep(StepDelay);
-
             return new ReadOnlyCollection<IWebElement>(WrappedDriver.FindElements(by)
                 .Select(e => (IWebElement) new NgWebElement(this, e)).ToList());
         }
