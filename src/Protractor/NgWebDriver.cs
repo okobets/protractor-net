@@ -16,6 +16,7 @@ namespace Protractor
     {
         private const string AngularDeferBootstrap = "NG_DEFER_BOOTSTRAP!";
         private const int StepDelay = 500;
+        private const int WaitDelay = 3000;
 
         private readonly IJavaScriptExecutor jsExecutor;
         private readonly IList<NgModule> mockModules;
@@ -111,7 +112,13 @@ namespace Protractor
         public void WaitForAngular()
         {
             if (!IgnoreSynchronization)
+            {
+                // Safari on Mac has sync issues, hence this dirty workaround
+                if (WrappedDriver is RemoteWebDriver d && d.Capabilities.BrowserName.ToLowerInvariant().Contains("safari")) 
+                    Thread.Sleep(WaitDelay);
+
                 ExecuteAsyncScript(ClientSideScripts.WaitForAngular, RootElement);
+            }
         }
 
         #region IWebDriver Members
