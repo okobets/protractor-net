@@ -170,7 +170,6 @@ namespace Protractor
                 // Reset URL
                 WrappedDriver.Url = "about:blank";
 
-                // TODO: test Android
                 if (WrappedDriver is IHasCapabilities hcDriver &&
                     (hcDriver.Capabilities.BrowserName == "internet explorer" ||
                      hcDriver.Capabilities.BrowserName == "MicrosoftEdge" ||
@@ -183,8 +182,7 @@ namespace Protractor
                 }
                 else
                 {
-                    ExecuteScript("window.name += '" + AngularDeferBootstrap + "'; window.location.href = '" + value +
-                                  "';");
+                    ExecuteScript("window.name += '" + AngularDeferBootstrap + "'; window.location.href = '" + value + "';");
                 }
 
                 if (IgnoreSynchronization) return;

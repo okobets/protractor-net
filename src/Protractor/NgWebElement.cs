@@ -11,8 +11,6 @@ namespace Protractor
     /// </summary>
     public class NgWebElement : IWebElement, IWrapsElement
     {
-        private readonly NgWebDriver ngDriver;
-
         /// <summary>
         ///     Creates a new instance of <see cref="NgWebElement" /> by wrapping a <see cref="IWebElement" /> instance.
         /// </summary>
@@ -20,17 +18,14 @@ namespace Protractor
         /// <param name="element">The existing <see cref="IWebElement" /> instance.</param>
         public NgWebElement(NgWebDriver ngDriver, IWebElement element)
         {
-            this.ngDriver = ngDriver;
+            NgDriver = ngDriver;
             WrappedElement = element;
         }
 
         /// <summary>
         /// Gets the <see cref="NgWebDriver"/> instance used to initialize the element.
         /// </summary>
-        public NgWebDriver NgDriver
-        {
-            get { return this.ngDriver; }
-        }
+        public NgWebDriver NgDriver { get; }
 
         #region IWrapsElement Members
 
@@ -48,8 +43,8 @@ namespace Protractor
         /// <returns>The expression evaluated by Angular.</returns>
         public object Evaluate(string expression)
         {
-            ngDriver.WaitForAngular();
-            return ngDriver.ExecuteScript(ClientSideScripts.Evaluate, WrappedElement, expression);
+            NgDriver.WaitForAngular();
+            return NgDriver.ExecuteScript(ClientSideScripts.Evaluate, WrappedElement, expression);
         }
 
         #region IWebElement Members
@@ -61,7 +56,7 @@ namespace Protractor
         {
             get
             {
-                ngDriver.WaitForAngular();
+                NgDriver.WaitForAngular();
                 return WrappedElement.Displayed;
             }
         }
@@ -73,7 +68,7 @@ namespace Protractor
         {
             get
             {
-                ngDriver.WaitForAngular();
+                NgDriver.WaitForAngular();
                 return WrappedElement.Enabled;
             }
         }
@@ -86,7 +81,7 @@ namespace Protractor
         {
             get
             {
-                ngDriver.WaitForAngular();
+                NgDriver.WaitForAngular();
                 return WrappedElement.Location;
             }
         }
@@ -98,7 +93,7 @@ namespace Protractor
         {
             get
             {
-                ngDriver.WaitForAngular();
+                NgDriver.WaitForAngular();
                 return WrappedElement.Selected;
             }
         }
@@ -110,7 +105,7 @@ namespace Protractor
         {
             get
             {
-                ngDriver.WaitForAngular();
+                NgDriver.WaitForAngular();
                 return WrappedElement.Size;
             }
         }
@@ -122,7 +117,7 @@ namespace Protractor
         {
             get
             {
-                ngDriver.WaitForAngular();
+                NgDriver.WaitForAngular();
                 return WrappedElement.TagName;
             }
         }
@@ -135,7 +130,7 @@ namespace Protractor
         {
             get
             {
-                ngDriver.WaitForAngular();
+                NgDriver.WaitForAngular();
                 return WrappedElement.Text;
             }
         }
@@ -145,7 +140,7 @@ namespace Protractor
         /// </summary>
         public void Clear()
         {
-            ngDriver.WaitForAngular();
+            NgDriver.WaitForAngular();
             WrappedElement.Clear();
         }
 
@@ -154,7 +149,7 @@ namespace Protractor
         /// </summary>
         public void Click()
         {
-            ngDriver.WaitForAngular();
+            NgDriver.WaitForAngular();
             WrappedElement.Click();
         }
 
@@ -163,7 +158,7 @@ namespace Protractor
         /// </summary>
         public string GetAttribute(string attributeName)
         {
-            ngDriver.WaitForAngular();
+            NgDriver.WaitForAngular();
             return WrappedElement.GetAttribute(attributeName);
         }
 
@@ -172,7 +167,7 @@ namespace Protractor
         /// </summary>
         public string GetProperty(string propertyName)
         {
-            ngDriver.WaitForAngular();
+            NgDriver.WaitForAngular();
             return WrappedElement.GetProperty(propertyName);
         }
 
@@ -181,7 +176,7 @@ namespace Protractor
         /// </summary>
         public string GetCssValue(string propertyName)
         {
-            ngDriver.WaitForAngular();
+            NgDriver.WaitForAngular();
             return WrappedElement.GetCssValue(propertyName);
         }
 
@@ -190,7 +185,7 @@ namespace Protractor
         /// </summary>
         public void SendKeys(string text)
         {
-            ngDriver.WaitForAngular();
+            NgDriver.WaitForAngular();
             WrappedElement.SendKeys(text);
         }
 
@@ -199,7 +194,7 @@ namespace Protractor
         /// </summary>
         public void Submit()
         {
-            ngDriver.WaitForAngular();
+            NgDriver.WaitForAngular();
             WrappedElement.Submit();
         }
 
@@ -212,9 +207,9 @@ namespace Protractor
         public NgWebElement FindElement(By by)
         {
             if (by is JavaScriptBy scriptBy)
-                scriptBy.AdditionalScriptArguments = new object[] {ngDriver.RootElement, WrappedElement};
-            ngDriver.WaitForAngular();
-            return new NgWebElement(ngDriver, WrappedElement.FindElement(by));
+                scriptBy.AdditionalScriptArguments = new object[] {NgDriver.RootElement, WrappedElement};
+            NgDriver.WaitForAngular();
+            return new NgWebElement(NgDriver, WrappedElement.FindElement(by));
         }
 
         /// <summary>
@@ -229,10 +224,10 @@ namespace Protractor
         public ReadOnlyCollection<NgWebElement> FindElements(By by)
         {
             if (by is JavaScriptBy scriptBy)
-                scriptBy.AdditionalScriptArguments = new object[] {ngDriver.RootElement, WrappedElement};
-            ngDriver.WaitForAngular();
+                scriptBy.AdditionalScriptArguments = new object[] {NgDriver.RootElement, WrappedElement};
+            NgDriver.WaitForAngular();
             return new ReadOnlyCollection<NgWebElement>(WrappedElement.FindElements(by)
-                .Select(e => new NgWebElement(ngDriver, e)).ToList());
+                .Select(e => new NgWebElement(NgDriver, e)).ToList());
         }
 
         IWebElement ISearchContext.FindElement(By by)
@@ -243,10 +238,10 @@ namespace Protractor
         ReadOnlyCollection<IWebElement> ISearchContext.FindElements(By by)
         {
             if (by is JavaScriptBy scriptBy)
-                scriptBy.AdditionalScriptArguments = new object[] {ngDriver.RootElement, WrappedElement};
-            ngDriver.WaitForAngular();
+                scriptBy.AdditionalScriptArguments = new object[] {NgDriver.RootElement, WrappedElement};
+            NgDriver.WaitForAngular();
             return new ReadOnlyCollection<IWebElement>(WrappedElement.FindElements(by)
-                .Select(e => (IWebElement) new NgWebElement(ngDriver, e)).ToList());
+                .Select(e => (IWebElement) new NgWebElement(NgDriver, e)).ToList());
         }
 
         #endregion
