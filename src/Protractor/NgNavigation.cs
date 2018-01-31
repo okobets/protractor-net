@@ -22,17 +22,19 @@ namespace Protractor
         }
 
         /// <summary>
-        ///     Gets the wrapped <see cref="INavigation" /> instance.
+        /// Gets the <see cref="NgWebDriver"/> instance used to initialize the instance.
         /// </summary>
-        public INavigation WrappedNavigation { get; }
+        public NgWebDriver NgDriver
+        {
+            get { return this.ngDriver; }
+        }
 
         /// <summary>
-        ///     Browse to another page using in-page navigation.
+        /// Gets the wrapped <see cref="INavigation"/> instance.
         /// </summary>
-        /// <param name="path">The path to load using the same syntax as '$location.url()'.</param>
-        public void GoToLocation(string path)
+        public INavigation WrappedNavigation
         {
-            ngDriver.Location = path;
+            get { return this.navigation; }
         }
 
         #region INavigation Members
