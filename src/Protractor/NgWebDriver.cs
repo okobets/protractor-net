@@ -346,40 +346,6 @@ namespace Protractor
 
         #endregion
 
-        /// <summary>
-        /// Gets or sets the location for in-page navigation using the same syntax as '$location.url()'.
-        /// </summary>
-        public string Location
-        {
-            get
-            {
-                this.WaitForAngular();
-                return this.ExecuteScript(ClientSideScripts.GetLocation, this.rootElement) as string;
-            }
-            set
-            {
-                this.WaitForAngular();
-                this.ExecuteScript(ClientSideScripts.SetLocation, this.rootElement, value);
-            }
-        }
-
-        /// <summary>
-        /// Waits for Angular to finish any ongoing $http, $timeouts, digest cycles etc.
-        /// This is used before any action on this driver, except if IgnoreSynchonization flag is set to true.
-        /// </summary>
-        /// <remarks>
-        /// Use NgWebDriver.Manage().Timeouts().AsynchronousJavaScript to specify the amount of time the driver should wait for Angular.
-        /// </remarks>
-        /// <exception cref="InvalidOperationException">If Angular could not be found.</exception>
-        /// <exception cref="WebDriverTimeoutException">If the driver times out while waiting for Angular.</exception>
-        public void WaitForAngular()
-        {
-            if (!this.IgnoreSynchronization)
-            {
-                this.ExecuteAsyncScript(ClientSideScripts.WaitForAngular, this.rootElement);
-            }
-        }
-
         #region IJavaScriptExecutor Members
 
         /// <summary>

@@ -8,8 +8,6 @@ namespace Protractor
     /// </summary>
     public class NgNavigation : INavigation
     {
-        private readonly NgWebDriver ngDriver;
-
         /// <summary>
         ///     Creates a new instance of <see cref="NgNavigation" /> by wrapping a <see cref="INavigation" /> instance.
         /// </summary>
@@ -17,25 +15,19 @@ namespace Protractor
         /// <param name="navigation">The existing <see cref="INavigation" /> instance.</param>
         public NgNavigation(NgWebDriver ngDriver, INavigation navigation)
         {
-            this.ngDriver = ngDriver;
+            NgDriver = ngDriver;
             WrappedNavigation = navigation;
         }
 
         /// <summary>
         /// Gets the <see cref="NgWebDriver"/> instance used to initialize the instance.
         /// </summary>
-        public NgWebDriver NgDriver
-        {
-            get { return this.ngDriver; }
-        }
+        public NgWebDriver NgDriver { get; }
 
         /// <summary>
         /// Gets the wrapped <see cref="INavigation"/> instance.
         /// </summary>
-        public INavigation WrappedNavigation
-        {
-            get { return this.navigation; }
-        }
+        public INavigation WrappedNavigation { get; }
 
         #region INavigation Members
 
@@ -44,7 +36,7 @@ namespace Protractor
         /// </summary>
         public void Back()
         {
-            ngDriver.WaitForAngular();
+            NgDriver.WaitForAngular();
             WrappedNavigation.Back();
         }
 
@@ -53,7 +45,7 @@ namespace Protractor
         /// </summary>
         public void Forward()
         {
-            ngDriver.WaitForAngular();
+            NgDriver.WaitForAngular();
             WrappedNavigation.Forward();
         }
 
@@ -81,8 +73,8 @@ namespace Protractor
             if (ensureAngularApp)
             {
                 if (url == null)
-                    throw new ArgumentNullException("url", "URL cannot be null.");
-                ngDriver.Url = url.ToString();
+                    throw new ArgumentNullException(nameof(url), "URL cannot be null.");
+                NgDriver.Url = url.ToString();
             }
             else
             {
@@ -112,7 +104,7 @@ namespace Protractor
         public void GoToUrl(string url, bool ensureAngularApp)
         {
             if (ensureAngularApp)
-                ngDriver.Url = url;
+                NgDriver.Url = url;
             else
                 WrappedNavigation.GoToUrl(url);
         }
@@ -122,14 +114,14 @@ namespace Protractor
         /// </summary>
         public void Refresh()
         {
-            if (ngDriver.IgnoreSynchronization)
+            if (NgDriver.IgnoreSynchronization)
             {
                 WrappedNavigation.Refresh();
             }
             else
             {
-                var url = ngDriver.ExecuteScript("return window.location.href;") as string;
-                ngDriver.Url = url;
+                var url = NgDriver.ExecuteScript("return window.location.href;") as string;
+                NgDriver.Url = url;
             }
         }
 
