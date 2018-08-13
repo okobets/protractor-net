@@ -54,7 +54,7 @@ namespace Protractor
             RootElement = rootElement;
             this.mockModules = new List<NgModule>(mockModules);
 
-            if (WrappedDriver is RemoteWebDriver d && d.Capabilities.BrowserName.ToLowerInvariant().Contains("safari")) 
+            if (WrappedDriver is RemoteWebDriver d && d.Capabilities != null && d.Capabilities.HasCapability("browserName") && d.Capabilities.GetCapability("browserName").ToString().ToLowerInvariant().Contains("safari")) 
                 Thread.Sleep(5000);
         }
 
@@ -116,7 +116,7 @@ namespace Protractor
             if (!IgnoreSynchronization)
             {
                 // Safari on Mac has sync issues, hence this dirty workaround
-                if (WrappedDriver is RemoteWebDriver d && d.Capabilities.BrowserName.ToLowerInvariant().Contains("safari")) 
+                if (WrappedDriver is RemoteWebDriver d && d.Capabilities != null && d.Capabilities.HasCapability("browserName") && d.Capabilities.GetCapability("browserName").ToString().ToLowerInvariant().Contains("safari")) 
                     Thread.Sleep(WaitDelay);
 
                 ExecuteAsyncScript(ClientSideScripts.WaitForAngular, RootElement);
@@ -171,11 +171,11 @@ namespace Protractor
                 WrappedDriver.Url = "about:blank";
 
                 if (WrappedDriver is IHasCapabilities hcDriver &&
-                    (hcDriver.Capabilities.BrowserName == "internet explorer" ||
-                     hcDriver.Capabilities.BrowserName == "MicrosoftEdge" ||
-                     hcDriver.Capabilities.BrowserName == "phantomjs" ||
-                     hcDriver.Capabilities.BrowserName == "firefox" ||
-                     hcDriver.Capabilities.BrowserName.ToLower() == "safari"))
+                    (hcDriver.Capabilities.GetCapability("browserName").ToString() == "internet explorer" ||
+                     hcDriver.Capabilities.GetCapability("browserName").ToString() == "MicrosoftEdge" ||
+                     hcDriver.Capabilities.GetCapability("browserName").ToString() == "phantomjs" ||
+                     hcDriver.Capabilities.GetCapability("browserName").ToString() == "firefox" ||
+                     hcDriver.Capabilities.GetCapability("browserName").ToString().ToLower() == "safari"))
                 {
                     ExecuteScript("window.name += '" + AngularDeferBootstrap + "';");
                     WrappedDriver.Url = value;
