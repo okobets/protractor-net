@@ -1,6 +1,9 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\src",
+    "\\src\\Protractor"
   ],
+  "SelectedNode": "\\Global settings (C:\\Users\\oleg\\AppData\\Local\\Microsoft\\VisualStudio\\15.0_df67d4ef\\OpenFolder)",
   "PreviewInSolutionExplorer": false
 }
