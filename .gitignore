@@ -5,14 +5,7 @@
 bin
 obj
 *.dll
-
 *.pdb
-
 *.suo
-
 *.csproj.user
-
-
-
-
-/.vs
+.vs/
